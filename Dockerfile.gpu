@@ -1,0 +1,44 @@
+# Base NVIDIA
+FROM nvidia/cuda:12.6.2-cudnn-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y \
+    python3.10 \
+    python3-pip \
+    ffmpeg \
+    libgl1 \
+    libglib2.0-0 \
+    v4l-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+WORKDIR /app
+
+# 🔑 1. Instalar PyTorch CUDA desde índice oficial
+RUN pip install --upgrade pip && \
+    pip install torch==2.8.0 torchvision==0.23.0 \
+      --index-url https://download.pytorch.org/whl/cu126
+
+# 🔑 2. Instalar el resto
+COPY requirements-gpu.txt .
+RUN pip install --no-cache-dir -r requirements-gpu.txt
+
+COPY . .
+
+ENTRYPOINT ["python", "transLowNet_V2.py"]
+
+
+
+# docker build -t translownet-gpu -f Dockerfile.gpu .
+
+
+# docker run -it \
+#   --name translownet_gpu_cam \
+#   --gpus all \
+#   --device=/dev/video0:/dev/video0 \
+#   translownet-gpu
+
