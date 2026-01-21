@@ -1,0 +1,34 @@
+FROM python:3.9.25-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    libgl1 \
+    libglib2.0-0 \
+    v4l-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements-cpu.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements-cpu.txt
+
+COPY . .
+
+ENTRYPOINT ["python", "transLowNet_V2.py"]
+
+
+#  docker build -t translownet-cpu -f Dockerfile.cpu .
+
+#     docker run \
+#   --device=/dev/video0:/dev/video0 \
+#   translownet-cpu \
+#   ls -l /dev/video*
+
+# Delete all dockers image: docker rmi $(docker images -aq) ; docker images
+
+
